@@ -1,0 +1,16 @@
+{
+  "handler": {
+    "formatter": "auto"
+  },
+  "loggers": {
+    "__main__": {
+      "level": "info"
+    },
+    "httpx": {
+      "level": "info"
+    },
+    "secret": {
+      "level": "info"
+    }
+  }
+}
