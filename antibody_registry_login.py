@@ -3,7 +3,7 @@
 
 import getpass
 import os
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
 from typing import Annotated
 
@@ -39,7 +39,12 @@ class AntibodyRegistryAuth(Auth):
     def cookies(self) -> Cookies | None:
         return self._cookies
 
-    def auth_flow(self, request: Request) -> Generator[Request, Response]:
+    def set_cookie_header(self, request: Request) -> None:
+        if self._cookies is not None:
+            self._cookies.set_cookie_header(request)
+
+    def sync_auth_flow(self, request: Request) -> Generator[Request, Response]:
+        # Tested only with single-treaded code.
         self.set_cookie_header(request)
         response = yield request
 
@@ -48,9 +53,10 @@ class AntibodyRegistryAuth(Auth):
             self.set_cookie_header(request)
             yield request
 
-    def set_cookie_header(self, request: Request) -> None:
-        if self._cookies is not None:
-            self._cookies.set_cookie_header(request)
+    async def async_auth_flow(self, request: Request) -> AsyncGenerator[Request, Response]:  # type: ignore[override] # noqa: ARG002
+        # Untested with async client, so explicitly disable the async auth flow.
+        msg = "Cannot use a sync authentication class with httpx.AsyncClient"
+        raise RuntimeError(msg)
 
 
 def login_to_antibody_registry() -> Cookies:
