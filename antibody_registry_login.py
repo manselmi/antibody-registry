@@ -2,7 +2,6 @@
 # vim: set ft=python :
 
 import getpass
-import os
 from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
 from threading import RLock
@@ -24,7 +23,7 @@ from httpx import (
 from lxml.etree import _ElementUnicodeResult
 
 from logging_config import configure_logging
-from secret import Secret, secret_cmd_argv
+from secret import Secret, secret_cmd_argv, secret_env_var
 
 logger = structlog.get_logger(__name__)
 
@@ -59,7 +58,7 @@ class AntibodyRegistryAuth(Auth):
                 yield request
 
     async def async_auth_flow(self, request: Request) -> AsyncGenerator[Request, Response]:  # type: ignore[override] # noqa: ARG002
-        msg = "async auth flow not implemented"
+        msg = "async_auth_flow_not_implemented"
         logger.error(msg)
         raise RuntimeError(msg)
 
@@ -75,7 +74,7 @@ def login_to_antibody_registry() -> Cookies:
         tree = lxml.html.fromstring(response.content)
         xpath: list[_ElementUnicodeResult] = tree.xpath('//form[@id="kc-form-login"]/@action')  # type: ignore[assignment]
         if not xpath:
-            msg = "login POST URL not found"
+            msg = "login_post_url_not_found"
             logger.error(msg)
             raise RuntimeError(msg)
         login_post_url = URL(str(xpath[0]))
@@ -96,12 +95,7 @@ def login_to_antibody_registry() -> Cookies:
 
 
 def get_antibody_registry_credentials() -> tuple[Secret, Secret]:
-    try:
-        username = Secret(os.environ["ANTIBODY_REGISTRY_USERNAME"])
-        password = Secret(os.environ["ANTIBODY_REGISTRY_PASSWORD"])
-    except KeyError:
-        if getpass.getuser() not in {"manselmi", "m.anselmi"}:
-            raise
+    if getpass.getuser() in {"manselmi", "m.anselmi"}:
         username = secret_cmd_argv(
             [
                 "op",
@@ -118,6 +112,9 @@ def get_antibody_registry_credentials() -> tuple[Secret, Secret]:
                 "op://yksesvynnyj573ps3dagfglceu/ynqycbcmytlr3qx4ggbxioriiu/password",
             ],
         )
+    else:
+        username = secret_env_var("ANTIBODY_REGISTRY_USERNAME")
+        password = secret_env_var("ANTIBODY_REGISTRY_PASSWORD")
 
     return username, password
 
