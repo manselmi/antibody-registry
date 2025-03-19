@@ -39,18 +39,18 @@ class AntibodyRegistryAuth(Auth):
     def cookies(self) -> Cookies | None:
         return self._cookies
 
-    def set_cookie_header(self, request: Request) -> None:
+    def _set_cookie_header(self, request: Request) -> None:
         if self._cookies is not None:
             self._cookies.set_cookie_header(request)
 
     def sync_auth_flow(self, request: Request) -> Generator[Request, Response]:
         # Tested only with single-treaded code.
-        self.set_cookie_header(request)
+        self._set_cookie_header(request)
         response = yield request
 
         if response.status_code == codes.UNAUTHORIZED:
             self._cookies = login_to_antibody_registry()
-            self.set_cookie_header(request)
+            self._set_cookie_header(request)
             yield request
 
     async def async_auth_flow(self, request: Request) -> AsyncGenerator[Request, Response]:  # type: ignore[override] # noqa: ARG002
