@@ -21,6 +21,7 @@ from httpx import (
     Timeout,
     codes,
 )
+from lxml.etree import _ElementUnicodeResult
 
 from logging_config import configure_logging
 from secret import Secret, secret_cmd_argv
@@ -59,6 +60,7 @@ class AntibodyRegistryAuth(Auth):
 
     async def async_auth_flow(self, request: Request) -> AsyncGenerator[Request, Response]:  # type: ignore[override] # noqa: ARG002
         msg = "async auth flow not implemented"
+        logger.error(msg)
         raise RuntimeError(msg)
 
 
@@ -71,7 +73,12 @@ def login_to_antibody_registry() -> Cookies:
 
         cookies = response.cookies
         tree = lxml.html.fromstring(response.content)
-        login_post_url = URL(tree.xpath('//form[@id="kc-form-login"]/@action')[0])  # type: ignore[arg-type,index]
+        xpath: list[_ElementUnicodeResult] = tree.xpath('//form[@id="kc-form-login"]/@action')  # type: ignore[assignment]
+        if not xpath:
+            msg = "login POST URL not found"
+            logger.error(msg)
+            raise RuntimeError(msg)
+        login_post_url = URL(str(xpath[0]))
 
         response = client.post(
             login_post_url,
