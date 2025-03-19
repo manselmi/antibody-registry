@@ -5,6 +5,7 @@ import getpass
 import os
 from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
+from threading import RLock
 from typing import Annotated
 
 import lxml.html
@@ -34,28 +35,31 @@ TIMEOUT = Timeout(10.0)  # seconds
 class AntibodyRegistryAuth(Auth):
     def __init__(self, cookies: Cookies | None = None, /) -> None:
         self._cookies = cookies
+        self._lock = RLock()
 
     @property
     def cookies(self) -> Cookies | None:
-        return self._cookies
+        with self._lock:
+            return self._cookies
 
     def _set_cookie_header(self, request: Request) -> None:
-        if self._cookies is not None:
-            self._cookies.set_cookie_header(request)
+        with self._lock:
+            if self._cookies is not None:
+                self._cookies.set_cookie_header(request)
 
     def sync_auth_flow(self, request: Request) -> Generator[Request, Response]:
-        # Tested only with single-treaded code.
-        self._set_cookie_header(request)
-        response = yield request
-
-        if response.status_code == codes.UNAUTHORIZED:
-            self._cookies = login_to_antibody_registry()
+        with self._lock:
             self._set_cookie_header(request)
-            yield request
+            response = yield request
+
+            if response.status_code == codes.UNAUTHORIZED:
+                self._cookies = login_to_antibody_registry()
+                self._set_cookie_header(request)
+                yield request
 
     async def async_auth_flow(self, request: Request) -> AsyncGenerator[Request, Response]:  # type: ignore[override] # noqa: ARG002
         # Untested with async client, so explicitly disable the async auth flow.
-        msg = "Cannot use a sync authentication class with httpx.AsyncClient"
+        msg = "async auth flow not implemented"
         raise RuntimeError(msg)
 
 
@@ -114,7 +118,7 @@ def get_antibody_registry_credentials() -> tuple[Secret, Secret]:
 
 def main(
     logging_config: Annotated[
-        Path, typer.Option(help="file from which a logging configuration will be read")
+        Path, typer.Option(help="file from which the logging configuration will be read")
     ] = Path("logging_config.json"),
 ) -> None:
     configure_logging(logging_config)
