@@ -58,7 +58,6 @@ class AntibodyRegistryAuth(Auth):
                 yield request
 
     async def async_auth_flow(self, request: Request) -> AsyncGenerator[Request, Response]:  # type: ignore[override] # noqa: ARG002
-        # Untested with async client, so explicitly disable the async auth flow.
         msg = "async auth flow not implemented"
         raise RuntimeError(msg)
 
