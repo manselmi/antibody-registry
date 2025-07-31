@@ -95,13 +95,15 @@ def login_to_antibody_registry() -> Cookies:
 
 
 def get_antibody_registry_credentials() -> tuple[Secret, Secret]:
-    if getpass.getuser() in {"manselmi", "m.anselmi"}:
+    if getpass.getuser() in {
+        "manselmi",
+    }:
         username = secret_cmd_argv(
             [
                 "op",
                 "read",
                 "--no-newline",
-                "op://yksesvynnyj573ps3dagfglceu/ynqycbcmytlr3qx4ggbxioriiu/username",
+                "op://yksesvynnyj573ps3dagfglceu/de3yx4c5zeor7ztpbleisrkcvi/username",
             ],
         )
         password = secret_cmd_argv(
@@ -109,7 +111,7 @@ def get_antibody_registry_credentials() -> tuple[Secret, Secret]:
                 "op",
                 "read",
                 "--no-newline",
-                "op://yksesvynnyj573ps3dagfglceu/ynqycbcmytlr3qx4ggbxioriiu/password",
+                "op://yksesvynnyj573ps3dagfglceu/de3yx4c5zeor7ztpbleisrkcvi/password",
             ],
         )
     else:
