@@ -103,6 +103,7 @@ dummy-variable-rgx = '^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$'
 fixable = ['ALL']
 ignore = [
   'ANN',      # mypy handles our type annotations
+  'C901',
   'COM812',   # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
   'COM819',   # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
   'CPY',      # not publishing publicly
@@ -113,6 +114,8 @@ ignore = [
   'ERA',      # do not remove commented-out code
   'ISC001',   # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
   'ISC002',   # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+  'PLR0912',
+  'PLR0915',
   'Q000',     # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
   'Q001',     # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
   'Q002',     # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules

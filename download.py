@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # vim: set ft=python :
 
-import datetime
 import getpass
 import itertools
 import lzma
+import sys
+import time
 from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
 from threading import RLock
@@ -34,14 +35,12 @@ from secret import Secret, secret_cmd_argv, secret_env_var
 logger = structlog.get_logger(__name__)
 
 
+BASE_URL = URL("https://www.antibodyregistry.org/api/antibodies")
 HTTP2 = True
-DEFAULT_TIMEOUT_DURATION = datetime.timedelta(seconds=10)
-FETCH_TIMEOUT_DURATION = datetime.timedelta(seconds=30)
-FETCH_ATTEMPTS = 10
+DEFAULT_TIMEOUT = Timeout(5)  # seconds
+FETCH_TIMEOUT = Timeout(**{**DEFAULT_TIMEOUT.as_dict(), "read": 30})  # seconds
+FETCH_ATTEMPTS = 3
 PAGE_SIZE = 500
-
-DEFAULT_TIMEOUT = Timeout(DEFAULT_TIMEOUT_DURATION.total_seconds())
-FETCH_TIMEOUT = Timeout(FETCH_TIMEOUT_DURATION.total_seconds())
 
 
 class AntibodyRegistryAuth(Auth):
@@ -145,7 +144,8 @@ def get_antibody_registry_credentials() -> tuple[Secret, Secret]:
 
 def retry(exc: Exception) -> bool:
     if isinstance(exc, HTTPStatusError):
-        return codes.is_server_error(exc.response.status_code)
+        status_code = exc.response.status_code
+        return status_code == codes.TOO_MANY_REQUESTS or codes.is_server_error(status_code)
     return isinstance(exc, HTTPError)
 
 
@@ -159,38 +159,96 @@ def main(
 ) -> None:
     configure_logging(logging_config)
 
-    base_url = URL("https://www.antibodyregistry.org/api/antibodies")
+    log = logger.bind(base_url=BASE_URL)
+
     params = {"size": PAGE_SIZE}
-
-    log = logger.bind(base_url=base_url)
-
     username, password = get_antibody_registry_credentials()
     output_dir.mkdir(exist_ok=True, parents=True)
+    fetch_error = False
 
     with Client(http2=HTTP2, timeout=DEFAULT_TIMEOUT) as client:
         client.auth = AntibodyRegistryAuth(client, username, password)
 
         for page in itertools.count(start=1):
             params["page"] = page
+            log = log.bind(params=params)
+
             path = output_dir.joinpath(f"{page}.xz")
-
-            log = log.bind(params=params, path=path)
-
             if path.exists():
+                log = log.bind(path=path)
                 log.info("fetch_skip")
+                log = log.unbind("path")
                 continue
 
             log.info("fetch_begin")
-            for attempt in stamina.retry_context(on=retry, attempts=FETCH_ATTEMPTS, timeout=None):
-                with attempt:
-                    response = client.get(base_url, params=params, timeout=FETCH_TIMEOUT)
-                    response.raise_for_status()
-            log.debug("fetch_end")
+            try:
+                for attempt in stamina.retry_context(
+                    on=retry, attempts=FETCH_ATTEMPTS, timeout=None
+                ):
+                    with attempt:
+                        response = client.get(BASE_URL, params=params, timeout=FETCH_TIMEOUT)
+                        log = log.bind(status_code=response.status_code)
 
+                        if response.status_code == codes.TOO_MANY_REQUESTS and (
+                            retry_after := response.headers.get("retry-after")
+                        ):
+                            next_wait_seconds = attempt.next_wait
+                            log = log.bind(
+                                next_wait_seconds=next_wait_seconds, retry_after=retry_after
+                            )
+                            retry_after_seconds = int(retry_after)
+                            sleep_seconds = max(retry_after_seconds - next_wait_seconds, 0)
+                            log = log.bind(
+                                retry_after_seconds=retry_after_seconds, sleep_seconds=sleep_seconds
+                            )
+                            log.warning("fetch_retry_after")
+                            time.sleep(sleep_seconds)
+
+                        response.raise_for_status()
+            except Exception as exc:
+                log.exception("fetch_error")
+                fetch_error = True
+                if isinstance(exc, HTTPError):
+                    continue
+                raise
+            else:
+                current_element = PAGE_SIZE * page
+                total_elements = response.json()["totalElements"]
+                log = log.bind(current_element=current_element, total_elements=total_elements)
+                log.info("fetch_end")
+                if (
+                    current_element > total_elements
+                    and current_element % total_elements > PAGE_SIZE
+                ):
+                    log.info("fetch_out_of_bounds")
+                    break
+            finally:
+                log = log.try_unbind(
+                    "current_element",
+                    "next_wait_seconds",
+                    "retry_after",
+                    "retry_after_seconds",
+                    "sleep_seconds",
+                    "status_code",
+                    "total_elements",
+                )
+
+            log = log.bind(path=path)
             log.info("write_begin")
-            with lzma.open(path, mode="wb") as fobj:
-                fobj.write(response.content)
-            log.debug("write_end")
+            try:
+                with lzma.open(path, mode="wb") as fobj:
+                    fobj.write(response.content)
+            except (Exception, KeyboardInterrupt):
+                log.exception("write_error")
+                path.unlink(missing_ok=True)
+                raise
+            else:
+                log.info("write_end")
+            finally:
+                log = log.unbind("path")
+
+    if fetch_error:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
