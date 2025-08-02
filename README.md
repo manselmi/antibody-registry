@@ -1,12 +1,12 @@
 <!-- vim: set ft=markdown : -->
 
 
-# Antibody Registry login
+# Antibody Registry downloader
 
 ## Summary
 
-The script `antibody_registry_login.py` demonstrates automated headless login to the Antibody
-Registry with [`httpx`](https://www.python-httpx.org/) by implementing a [custom authentication
+The script `download.py` demonstrates automated headless login to the Antibody Registry
+with [`httpx`](https://www.python-httpx.org/) by implementing a [custom authentication
 scheme](https://www.python-httpx.org/advanced/authentication/#custom-authentication-schemes).
 
 ## Prerequisites
@@ -31,19 +31,27 @@ scheme](https://www.python-httpx.org/advanced/authentication/#custom-authenticat
 ### Invocation
 
 ``` shell
-pixi run -- ./antibody_registry_login.py
+pixi run -- ./download.py
 ```
 
 ### Output
 
 ``` text
-2025-03-18T20:18:01.307942Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/api/antibodies?size=10&page=51 "HTTP/2 401 Unauthorized" [httpx]
-2025-03-18T20:18:03.309825Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/login "HTTP/2 303 See Other" [httpx]
-2025-03-18T20:18:03.354456Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/oauth/authorize?state=33818307-23c0-4bff-a19f-51d4668da8de "HTTP/2 303 See Other" [httpx]
-2025-03-18T20:18:03.485704Z [info     ] HTTP Request: GET https://accounts.antibodyregistry.org/auth/realms/areg/protocol/openid-connect/auth?access_type=online&client_id=web-client&redirect_uri=https%3A%2F%2Fwww.antibodyregistry.org%2Foauth%2Fcallback&response_type=code&scope=openid+email+profile&state=33818307-23c0-4bff-a19f-51d4668da8de "HTTP/2 200 OK" [httpx]
-2025-03-18T20:18:03.594480Z [info     ] HTTP Request: POST https://accounts.antibodyregistry.org/auth/realms/areg/login-actions/authenticate?session_code=ac_Qpj8bu8JsRyFqz3QWVJeBCplADewlogvCjoSDY8c&execution=efc751e8-55c5-4631-9faa-712e26fec296&client_id=web-client&tab_id=ePx64GuAhtg "HTTP/2 302 Found" [httpx]
-2025-03-18T20:18:03.677347Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/oauth/callback?state=33818307-23c0-4bff-a19f-51d4668da8de&session_state=a83aff13-c172-4786-ae31-1f4e72c31a75&code=16c523b3-0837-43cd-a8ea-cbd3c03017b7.a83aff13-c172-4786-ae31-1f4e72c31a75.111caf43-3d26-484d-8dc9-7fa911ac221c "HTTP/2 303 See Other" [httpx]
-2025-03-18T20:18:03.797296Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/login "HTTP/2 200 OK" [httpx]
-2025-03-18T20:18:05.391296Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/api/antibodies?size=10&page=51 "HTTP/2 200 OK" [httpx]
-2025-03-18T20:18:06.733296Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/api/antibodies?size=10&page=52 "HTTP/2 200 OK" [httpx]
+2025-08-02T04:21:17.185231Z [info     ] fetch_begin                    [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 1} path=PosixPath('output/1.xz')
+2025-08-02T04:21:19.205919Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/api/antibodies?size=500&page=1 "HTTP/2 200 OK" [httpx]
+2025-08-02T04:21:19.406552Z [info     ] write_begin                    [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 1} path=PosixPath('output/1.xz')
+2025-08-02T04:21:19.465958Z [info     ] fetch_begin                    [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 2} path=PosixPath('output/2.xz')
+2025-08-02T04:21:19.513076Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/api/antibodies?size=500&page=2 "HTTP/2 401 Unauthorized" [httpx]
+2025-08-02T04:21:19.553050Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/login "HTTP/2 303 See Other" [httpx]
+2025-08-02T04:21:19.592994Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/oauth/authorize?state=06c38c06-bcda-4214-95c7-c673c1c452af "HTTP/2 303 See Other" [httpx]
+2025-08-02T04:21:19.727666Z [info     ] HTTP Request: GET https://accounts.antibodyregistry.org/auth/realms/areg/protocol/openid-connect/auth?access_type=online&client_id=web-client&redirect_uri=https%3A%2F%2Fwww.antibodyregistry.org%2Foauth%2Fcallback&response_type=code&scope=openid+email+profile&state=06c38c06-bcda-4214-95c7-c673c1c452af "HTTP/2 200 OK" [httpx]
+2025-08-02T04:21:19.803383Z [info     ] HTTP Request: POST https://accounts.antibodyregistry.org/auth/realms/areg/login-actions/authenticate?session_code=H1MWl0jYGl2NyBL4sr1fiNd-SfZiiQjJ7XR9xHiKFNQ&execution=efc751e8-55c5-4631-9faa-712e26fec296&client_id=web-client&tab_id=wuQTA8M4jy4 "HTTP/2 302 Found" [httpx]
+2025-08-02T04:21:19.958244Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/oauth/callback?state=06c38c06-bcda-4214-95c7-c673c1c452af&session_state=08dc3f8c-0249-4d79-a265-ffd9ff4349ff&code=d640023e-05e7-46a6-bbde-c11c5021f5b6.08dc3f8c-0249-4d79-a265-ffd9ff4349ff.111caf43-3d26-484d-8dc9-7fa911ac221c "HTTP/2 303 See Other" [httpx]
+2025-08-02T04:21:20.004971Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/login "HTTP/2 200 OK" [httpx]
+2025-08-02T04:21:21.975299Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/api/antibodies?size=500&page=2 "HTTP/2 200 OK" [httpx]
+2025-08-02T04:21:22.184774Z [info     ] write_begin                    [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 2} path=PosixPath('output/2.xz')
+2025-08-02T04:21:22.249379Z [info     ] fetch_begin                    [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 3} path=PosixPath('output/3.xz')
+2025-08-02T04:21:24.144106Z [info     ] HTTP Request: GET https://www.antibodyregistry.org/api/antibodies?size=500&page=3 "HTTP/2 200 OK" [httpx]
+2025-08-02T04:21:24.387959Z [info     ] write_begin                    [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 3} path=PosixPath('output/3.xz')
+…
 ```

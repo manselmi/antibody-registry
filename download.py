@@ -3,13 +3,15 @@
 
 import datetime
 import getpass
-import time
+import itertools
+import lzma
 from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
 from threading import RLock
 from typing import Annotated
 
 import lxml.html
+import stamina
 import structlog
 import typer
 from httpx import (
@@ -17,6 +19,8 @@ from httpx import (
     Auth,
     Client,
     Cookies,
+    HTTPError,
+    HTTPStatusError,
     Request,
     Response,
     Timeout,
@@ -33,7 +37,8 @@ logger = structlog.get_logger(__name__)
 HTTP2 = True
 DEFAULT_TIMEOUT_DURATION = datetime.timedelta(seconds=10)
 FETCH_TIMEOUT_DURATION = datetime.timedelta(seconds=30)
-SLEEP_DURATION = datetime.timedelta(seconds=0)
+FETCH_ATTEMPTS = 10
+PAGE_SIZE = 500
 
 DEFAULT_TIMEOUT = Timeout(DEFAULT_TIMEOUT_DURATION.total_seconds())
 FETCH_TIMEOUT = Timeout(FETCH_TIMEOUT_DURATION.total_seconds())
@@ -138,31 +143,54 @@ def get_antibody_registry_credentials() -> tuple[Secret, Secret]:
     return username, password
 
 
+def retry(exc: Exception) -> bool:
+    if isinstance(exc, HTTPStatusError):
+        return codes.is_server_error(exc.response.status_code)
+    return isinstance(exc, HTTPError)
+
+
 def main(
     logging_config: Annotated[
         Path, typer.Option(help="file from which the logging configuration will be read")
     ] = Path("logging_config.json"),
+    output_dir: Annotated[
+        Path, typer.Option(help="directory to which the response bodies will be written")
+    ] = Path("output"),
 ) -> None:
     configure_logging(logging_config)
 
+    base_url = URL("https://www.antibodyregistry.org/api/antibodies")
+    params = {"size": PAGE_SIZE}
+
+    log = logger.bind(base_url=base_url)
+
     username, password = get_antibody_registry_credentials()
-    sleep_seconds = SLEEP_DURATION.total_seconds()
-    first_iteration = True
+    output_dir.mkdir(exist_ok=True, parents=True)
 
     with Client(http2=HTTP2, timeout=DEFAULT_TIMEOUT) as client:
         client.auth = AntibodyRegistryAuth(client, username, password)
-        for url in map(
-            URL,
-            [
-                "https://www.antibodyregistry.org/api/antibodies?size=10&page=51",
-                "https://www.antibodyregistry.org/api/antibodies?size=10&page=52",
-            ],
-        ):
-            if not first_iteration:
-                time.sleep(sleep_seconds)
-            else:
-                first_iteration = False
-            client.get(url, timeout=FETCH_TIMEOUT)
+
+        for page in itertools.count(start=1):
+            params["page"] = page
+            path = output_dir.joinpath(f"{page}.xz")
+
+            log = log.bind(params=params, path=path)
+
+            if path.exists():
+                log.info("fetch_skip")
+                continue
+
+            log.info("fetch_begin")
+            for attempt in stamina.retry_context(on=retry, attempts=FETCH_ATTEMPTS, timeout=None):
+                with attempt:
+                    response = client.get(base_url, params=params, timeout=FETCH_TIMEOUT)
+                    response.raise_for_status()
+            log.debug("fetch_end")
+
+            log.info("write_begin")
+            with lzma.open(path, mode="wb") as fobj:
+                fobj.write(response.content)
+            log.debug("write_end")
 
 
 if __name__ == "__main__":

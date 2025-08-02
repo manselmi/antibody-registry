@@ -11,6 +11,9 @@
     },
     "secret": {
       "level": "info"
+    },
+    "stamina": {
+      "level": "info"
     }
   }
 }
