@@ -18,7 +18,7 @@ platforms = [
 python = { version = '>=3.13.5,<3.14' }
 
 [tool.pixi.pypi-dependencies]
-dlt = { version = '>=1.14.1' }
+dlt = { version = '>=1.14.1', extras = ["duckdb"] }
 httpx = { version = '>=0.28.1', extras = ['http2'] }
 lxml = { version = '>=6.0.0' }
 orjson = { version = '>=3.11.1' }
