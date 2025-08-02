@@ -33,9 +33,19 @@ TIMEOUT = Timeout(10.0)  # seconds
 
 
 class AntibodyRegistryAuth(Auth):
-    def __init__(self, cookies: Cookies | None = None, /) -> None:
-        self._cookies = cookies
+    def __init__(self, username: Secret, password: Secret) -> None:
+        self._username = username
+        self._password = password
+        self._cookies: Cookies | None = None
         self._lock = RLock()
+
+    @property
+    def username(self) -> Secret:
+        return self._username
+
+    @property
+    def password(self) -> Secret:
+        return self._password
 
     @property
     def cookies(self) -> Cookies | None:
@@ -53,19 +63,16 @@ class AntibodyRegistryAuth(Auth):
             response = yield request
 
             if response.status_code == codes.UNAUTHORIZED:
-                self._cookies = login_to_antibody_registry()
+                self._cookies = login_to_antibody_registry(self._username, self._password)
                 self._set_cookie_header(request)
                 yield request
 
     async def async_auth_flow(self, request: Request) -> AsyncGenerator[Request, Response]:  # type: ignore[override] # noqa: ARG002
         msg = "async_auth_flow_not_implemented"
-        logger.error(msg)
         raise RuntimeError(msg)
 
 
-def login_to_antibody_registry() -> Cookies:
-    username, password = get_antibody_registry_credentials()
-
+def login_to_antibody_registry(username: Secret, password: Secret) -> Cookies:
     with Client(follow_redirects=True, http2=HTTP2, timeout=TIMEOUT) as client:
         response = client.get(URL("https://www.antibodyregistry.org/login"))
         response.raise_for_status()
@@ -128,7 +135,8 @@ def main(
 ) -> None:
     configure_logging(logging_config)
 
-    auth = AntibodyRegistryAuth()
+    username, password = get_antibody_registry_credentials()
+    auth = AntibodyRegistryAuth(username, password)
     with Client(auth=auth, http2=HTTP2, timeout=TIMEOUT) as client:
         for url in map(
             URL,
