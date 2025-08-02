@@ -33,7 +33,8 @@ TIMEOUT = Timeout(10.0)  # seconds
 
 
 class AntibodyRegistryAuth(Auth):
-    def __init__(self, username: Secret, password: Secret) -> None:
+    def __init__(self, client: Client, username: Secret, password: Secret) -> None:
+        self._client = client
         self._username = username
         self._password = password
         self._cookies: Cookies | None = None
@@ -63,7 +64,9 @@ class AntibodyRegistryAuth(Auth):
             response = yield request
 
             if response.status_code == codes.UNAUTHORIZED:
-                self._cookies = login_to_antibody_registry(self._username, self._password)
+                self._cookies = login_to_antibody_registry(
+                    self._client, self._username, self._password
+                )
                 self._set_cookie_header(request)
                 yield request
 
@@ -72,33 +75,33 @@ class AntibodyRegistryAuth(Auth):
         raise RuntimeError(msg)
 
 
-def login_to_antibody_registry(username: Secret, password: Secret) -> Cookies:
-    with Client(follow_redirects=True, http2=HTTP2, timeout=TIMEOUT) as client:
-        response = client.get(URL("https://www.antibodyregistry.org/login"))
-        response.raise_for_status()
+def login_to_antibody_registry(client: Client, username: Secret, password: Secret) -> Cookies:
+    response = client.get(URL("https://www.antibodyregistry.org/login"), follow_redirects=True)
+    response.raise_for_status()
 
-        cookies = response.cookies
-        tree = lxml.html.fromstring(response.content)
-        xpath: list[_ElementUnicodeResult] = tree.xpath('//form[@id="kc-form-login"]/@action')  # type: ignore[assignment]
-        if not xpath:
-            msg = "login_post_url_not_found"
-            logger.error(msg)
-            raise RuntimeError(msg)
-        login_post_url = URL(str(xpath[0]))
+    cookies = response.cookies
+    tree = lxml.html.fromstring(response.content)
+    xpath: list[_ElementUnicodeResult] = tree.xpath('//form[@id="kc-form-login"]/@action')  # type: ignore[assignment]
+    if not xpath:
+        msg = "login_post_url_not_found"
+        logger.error(msg)
+        raise RuntimeError(msg)
+    login_post_url = URL(str(xpath[0]))
 
-        response = client.post(
-            login_post_url,
-            cookies=cookies,
-            data={
-                "username": username.get_secret_value(),
-                "password": password.get_secret_value(),
-                "rememberMe": "on",
-                "credentialId": "",
-            },
-        )
-        response.raise_for_status()
+    response = client.post(
+        login_post_url,
+        cookies=cookies,
+        data={
+            "username": username.get_secret_value(),
+            "password": password.get_secret_value(),
+            "rememberMe": "on",
+            "credentialId": "",
+        },
+        follow_redirects=True,
+    )
+    response.raise_for_status()
 
-        return response.history[1].cookies
+    return response.history[1].cookies
 
 
 def get_antibody_registry_credentials() -> tuple[Secret, Secret]:
@@ -136,8 +139,8 @@ def main(
     configure_logging(logging_config)
 
     username, password = get_antibody_registry_credentials()
-    auth = AntibodyRegistryAuth(username, password)
-    with Client(auth=auth, http2=HTTP2, timeout=TIMEOUT) as client:
+    with Client(http2=HTTP2, timeout=TIMEOUT) as client:
+        client.auth = AntibodyRegistryAuth(client, username, password)
         for url in map(
             URL,
             [
