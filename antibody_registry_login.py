@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # vim: set ft=python :
 
+import datetime
 import getpass
+import time
 from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
 from threading import RLock
@@ -29,7 +31,12 @@ logger = structlog.get_logger(__name__)
 
 
 HTTP2 = True
-TIMEOUT = Timeout(10.0)  # seconds
+DEFAULT_TIMEOUT_DURATION = datetime.timedelta(seconds=10)
+FETCH_TIMEOUT_DURATION = datetime.timedelta(seconds=30)
+SLEEP_DURATION = datetime.timedelta(seconds=0)
+
+DEFAULT_TIMEOUT = Timeout(DEFAULT_TIMEOUT_DURATION.total_seconds())
+FETCH_TIMEOUT = Timeout(FETCH_TIMEOUT_DURATION.total_seconds())
 
 
 class AntibodyRegistryAuth(Auth):
@@ -139,7 +146,10 @@ def main(
     configure_logging(logging_config)
 
     username, password = get_antibody_registry_credentials()
-    with Client(http2=HTTP2, timeout=TIMEOUT) as client:
+    sleep_seconds = SLEEP_DURATION.total_seconds()
+    first_iteration = True
+
+    with Client(http2=HTTP2, timeout=DEFAULT_TIMEOUT) as client:
         client.auth = AntibodyRegistryAuth(client, username, password)
         for url in map(
             URL,
@@ -148,7 +158,11 @@ def main(
                 "https://www.antibodyregistry.org/api/antibodies?size=10&page=52",
             ],
         ):
-            client.get(url)
+            if not first_iteration:
+                time.sleep(sleep_seconds)
+            else:
+                first_iteration = False
+            client.get(url, timeout=FETCH_TIMEOUT)
 
 
 if __name__ == "__main__":
