@@ -216,10 +216,7 @@ def main(
                 total_elements = response.json()["totalElements"]
                 log = log.bind(current_element=current_element, total_elements=total_elements)
                 log.info("fetch_end")
-                if (
-                    current_element > total_elements
-                    and current_element % total_elements > PAGE_SIZE
-                ):
+                if current_element >= total_elements + PAGE_SIZE:
                     log.info("fetch_out_of_bounds")
                     break
             finally:
