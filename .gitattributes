@@ -83,4 +83,5 @@
 #
 #   git cat-file/grep --textconv […]
 
-*  txt
+*     txt
+*.xz  bin

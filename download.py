@@ -86,6 +86,10 @@ class AntibodyRegistryAuth(Auth):
         raise RuntimeError(msg)
 
 
+class XMLError(Exception):
+    pass
+
+
 def login_to_antibody_registry(client: Client, username: Secret, password: Secret) -> Cookies:
     response = client.get(URL("https://www.antibodyregistry.org/login"), follow_redirects=True)
     response.raise_for_status()
@@ -96,7 +100,7 @@ def login_to_antibody_registry(client: Client, username: Secret, password: Secre
     if not xpath:
         msg = "login_post_url_not_found"
         logger.error(msg)
-        raise RuntimeError(msg)
+        raise XMLError(msg)
     login_post_url = URL(str(xpath[0]))
 
     response = client.post(
