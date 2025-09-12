@@ -15,17 +15,17 @@ platforms = [
 ]
 
 [tool.pixi.dependencies]
-python = { version = '>=3.13.5,<3.14' }
+python = { version = '>=3.13.7,<3.14' }
 
 [tool.pixi.pypi-dependencies]
 httpx = { version = '>=0.28.1', extras = ['http2'] }
-lxml = { version = '>=6.0.0' }
-orjson = { version = '>=3.11.1' }
+lxml = { version = '>=6.0.1' }
+orjson = { version = '>=3.11.3' }
 pydantic = { version = '>=2.11.7' }
 rich = { version = '>=14.1.0' }  # weak dependency of structlog
 stamina = { version = '>=25.1.0' }
 structlog = { version = '>=25.4.0' }
-typer = { version = '>=0.16.0' }
+typer = { version = '>=0.17.4' }
 
 [tool.pixi.environments]
 default = { solve-group = 'default' }
@@ -33,10 +33,10 @@ lint = { features = ['lint'], solve-group = 'default' }
 
 [tool.pixi.feature.lint.pypi-dependencies]
 lxml-stubs = { version = '>=0.5.1' }
-mypy = { version = '>=1.17.1', extras = ['faster-cache'] }
-pre-commit = { version = '>=4.2.0' }
-pre-commit-hooks = { version = '>=5.0.0' }
-ruff = { version = '>=0.12.7' }
+mypy = { version = '>=1.18.1', extras = ['faster-cache'] }
+pre-commit = { version = '>=4.3.0' }
+pre-commit-hooks = { version = '>=6.0.0' }
+ruff = { version = '>=0.13.0' }
 
 [tool.pixi.feature.lint.tasks]
 lint = { depends-on = ['pre-commit-run'] }
@@ -86,12 +86,21 @@ _pre-commit-install-prepare-commit-msg = { cmd = [
 
 
 [tool.mypy]
+allow_redefinition_new = true
+fixed_format_cache = true
 local_partial_types = true
 plugins = [
   'pydantic.mypy',
 ]
 python_version = '3.13'
 strict = true
+strict_bytes = true
+
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
 
 
 [tool.ruff]
@@ -99,8 +108,9 @@ line-length = 100
 target-version = 'py313'
 
 [tool.ruff.lint]
-dummy-variable-rgx = '^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$'
+explicit-preview-rules = true
 fixable = ['ALL']
+future-annotations = true
 ignore = [
   'ANN',      # mypy handles our type annotations
   'C901',
@@ -123,6 +133,7 @@ ignore = [
   'TCH',      # TYPE_CHECKING blocks break autodocs
   'W191',     # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
 ]
+preview = true
 select = ['ALL']
 unfixable = []
 
