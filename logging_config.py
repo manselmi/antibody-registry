@@ -1,6 +1,5 @@
 # vim: set ft=python :
 
-import logging
 import logging.config
 import sys
 from enum import StrEnum, auto

@@ -15,17 +15,17 @@ platforms = [
 ]
 
 [tool.pixi.dependencies]
-python = { version = '>=3.13.7,<3.14' }
+python = { version = '>=3.14.0,<3.15' }
 
 [tool.pixi.pypi-dependencies]
 httpx = { version = '>=0.28.1', extras = ['http2'] }
-lxml = { version = '>=6.0.1' }
+lxml = { version = '>=6.0.2' }
 orjson = { version = '>=3.11.3' }
-pydantic = { version = '>=2.11.7' }
+pydantic = { version = '>=2.12.0' }
 rich = { version = '>=14.1.0' }  # weak dependency of structlog
 stamina = { version = '>=25.1.0' }
 structlog = { version = '>=25.4.0' }
-typer = { version = '>=0.17.4' }
+typer = { version = '>=0.19.2' }
 
 [tool.pixi.environments]
 default = { solve-group = 'default' }
@@ -92,7 +92,7 @@ local_partial_types = true
 plugins = [
   'pydantic.mypy',
 ]
-python_version = '3.13'
+python_version = '3.14'
 strict = true
 strict_bytes = true
 
@@ -105,7 +105,7 @@ warn_required_dynamic_aliases = true
 
 [tool.ruff]
 line-length = 100
-target-version = 'py313'
+target-version = 'py314'
 
 [tool.ruff.lint]
 explicit-preview-rules = true
