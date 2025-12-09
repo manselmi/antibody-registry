@@ -15,13 +15,13 @@ platforms = [
 ]
 
 [tool.pixi.dependencies]
-python = { version = '>=3.14.0,<3.15' }
+python = { version = '>=3.14.2,<3.15' }
 
 [tool.pixi.pypi-dependencies]
 httpx = { version = '>=0.28.1', extras = ['http2'] }
 lxml = { version = '>=6.0.2' }
-orjson = { version = '>=3.11.4' }
-pydantic = { version = '>=2.12.4' }
+orjson = { version = '>=3.11.5' }
+pydantic = { version = '>=2.12.5' }
 rich = { version = '>=14.2.0' }  # weak dependency of structlog
 stamina = { version = '>=25.1.0' }
 structlog = { version = '>=25.5.0' }
@@ -33,10 +33,10 @@ lint = { features = ['lint'], solve-group = 'default' }
 
 [tool.pixi.feature.lint.pypi-dependencies]
 lxml-stubs = { version = '>=0.5.1' }
-mypy = { version = '>=1.18.1', extras = ['faster-cache'] }
-pre-commit = { version = '>=4.4.0' }
+mypy = { version = '>=1.19.0', extras = ['faster-cache'] }
+pre-commit = { version = '>=4.5.0' }
 pre-commit-hooks = { version = '>=6.0.0' }
-ruff = { version = '>=0.14.4' }
+ruff = { version = '>=0.14.8' }
 
 [tool.pixi.feature.lint.tasks]
 lint = { depends-on = ['pre-commit-run'] }
@@ -87,6 +87,10 @@ _pre-commit-install-prepare-commit-msg = { cmd = [
 
 [tool.mypy]
 allow_redefinition_new = true
+enable_incomplete_feature = [
+  'PreciseTupleTypes',
+  'TypeForm',
+]
 fixed_format_cache = true
 local_partial_types = true
 plugins = [
