@@ -29,10 +29,10 @@ from httpx import (
 )
 from lxml.etree import _ElementUnicodeResult
 
-from logging_config import configure_logging
+from logging_config import LoggingConfig, configure_logging
 from secret import Secret, secret_cmd_argv, secret_env_var
 
-logger = structlog.get_logger(__name__)
+LOGGER = structlog.get_logger(__name__)
 
 
 BASE_URL = URL("https://www.antibodyregistry.org/api/antibodies")
@@ -99,7 +99,7 @@ def login_to_antibody_registry(client: Client, username: Secret, password: Secre
     xpath: list[_ElementUnicodeResult] = tree.xpath('//form[@id="kc-form-login"]/@action')  # type: ignore[assignment]
     if not xpath:
         msg = "login_post_url_not_found"
-        logger.error(msg)
+        LOGGER.error(msg)
         raise XMLError(msg)
     login_post_url = URL(str(xpath[0]))
 
@@ -161,9 +161,9 @@ def main(
         Path, typer.Option(help="directory to which the response bodies will be written")
     ] = Path("output"),
 ) -> None:
-    configure_logging(logging_config)
+    configure_logging(LoggingConfig.model_validate_json(logging_config.read_bytes()))
 
-    log = logger.bind(base_url=BASE_URL)
+    log = LOGGER.bind(base_url=str(BASE_URL))
 
     params = {"size": PAGE_SIZE}
     username, password = get_antibody_registry_credentials()
@@ -179,7 +179,7 @@ def main(
 
             path = output_dir.joinpath(f"{page}.xz")
             if path.exists():
-                log = log.bind(path=path)
+                log = log.bind(path=str(path))
                 log.info("fetch_skip")
                 log = log.unbind("path")
                 continue

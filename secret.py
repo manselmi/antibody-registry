@@ -18,14 +18,13 @@ from typing import TypedDict, Unpack
 import structlog
 from pydantic.types import SecretStr
 
-logger = structlog.get_logger(__name__)
-
+LOGGER = structlog.get_logger(__name__)
 
 Secret = SecretStr
 
 
 class EnvLookupError(Exception):
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, /) -> None:
         super().__init__(f"environment variable name not found: {name}")
 
 
@@ -35,7 +34,7 @@ class _ReadTextKwargs(TypedDict, total=False):
     newline: str | None
 
 
-def secret_cmd_argv(argv: Sequence[str]) -> Secret:
+def secret_cmd_argv(argv: Sequence[str], /) -> Secret:
     """
     Read a secret from the given program's standard output.
 
@@ -45,14 +44,14 @@ def secret_cmd_argv(argv: Sequence[str]) -> Secret:
         >>> print(secret.get_secret_value())
         secret_value
     """
-    log = logger.bind(secret_cmd_argv=argv)
+    log = LOGGER.bind(secret_cmd_argv=argv)
     log.debug("run_secret_cmd")
     return Secret(
         subprocess.run(argv, check=True, encoding="utf-8", stdout=PIPE).stdout  # noqa:S603
     )
 
 
-def secret_cmd_env_var(name: str) -> Secret:
+def secret_cmd_env_var(name: str, /) -> Secret:
     """
     Read a secret from the standard output of the program referenced by
     the given environment variable.
@@ -64,7 +63,7 @@ def secret_cmd_env_var(name: str) -> Secret:
         >>> print(secret.get_secret_value())
         secret_value
     """
-    log = logger.bind(secret_cmd_env_var=name)
+    log = LOGGER.bind(secret_cmd_env_var=name)
     log.debug("read_secret_cmd_env_var")
     try:
         value = os.environ[name]
@@ -75,7 +74,7 @@ def secret_cmd_env_var(name: str) -> Secret:
     return secret_cmd_argv(argv)
 
 
-def secret_env_var(name: str) -> Secret:
+def secret_env_var(name: str, /) -> Secret:
     """
     Read a secret from the given environment variable.
 
@@ -86,7 +85,7 @@ def secret_env_var(name: str) -> Secret:
         >>> print(secret.get_secret_value())
         secret_value
     """
-    log = logger.bind(secret_env_var=name)
+    log = LOGGER.bind(secret_env_var=name)
     log.debug("read_secret_env_var")
     try:
         return Secret(os.environ[name])
@@ -95,7 +94,7 @@ def secret_env_var(name: str) -> Secret:
         raise EnvLookupError(name) from exc
 
 
-def secret_file(path: Path, **read_text_kwargs: Unpack[_ReadTextKwargs]) -> Secret:
+def secret_file(path: Path, /, **read_text_kwargs: Unpack[_ReadTextKwargs]) -> Secret:
     """
     Read a secret from the given path.
 
@@ -113,7 +112,7 @@ def secret_file(path: Path, **read_text_kwargs: Unpack[_ReadTextKwargs]) -> Secr
         >>> print(secret.get_secret_value())
         secret_value
     """
-    log = logger.bind(secret_file=path)
+    log = LOGGER.bind(secret_file=path)
     log.debug("read_secret_file")
     try:
         return Secret(path.read_text(**read_text_kwargs))

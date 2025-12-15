@@ -2,9 +2,10 @@
 
 import logging.config
 import sys
+from collections.abc import Mapping, Sequence
 from enum import StrEnum, auto
-from pathlib import Path
 from types import TracebackType
+from typing import Any
 
 import orjson
 import structlog
@@ -13,7 +14,9 @@ from structlog.typing import Processor
 
 from pydantic_base_model import BaseModel as Model
 
-logger = structlog.get_logger(__name__)
+HANDLER_NAME = "default"
+LOGGER = structlog.get_logger(__name__)
+STREAM = sys.stdout
 
 
 class Formatter(StrEnum):
@@ -39,34 +42,32 @@ class LoggerConfig(Model):
     level: LevelName = Field(...)
 
 
-_Loggers = dict[str, LoggerConfig]
+type LoggersConfig = Mapping[str, LoggerConfig]
 
 
 class LoggingConfig(Model):
     handler: HandlerConfig = Field(...)
-    loggers: _Loggers = Field(...)
+    loggers: LoggersConfig = Field(...)
 
 
-def configure_logging(path: Path) -> None:
-    logging_config = load_logging_config(path)
+def configure_logging(
+    config: LoggingConfig,
+    /,
+    *,
+    processors: Sequence[Processor] | None = None,
+) -> None:
+    if (formatter := config.handler.formatter) == Formatter.AUTO:
+        formatter = Formatter.PRETTY if STREAM.isatty() else Formatter.JSON
 
-    handler = "default"
-    stream = sys.stdout
+    default_stdlib_loggers_config = to_stdlib_loggers_config(
+        {__name__: LoggerConfig(level=LevelName.CRITICAL)}
+    )
+    stdlib_loggers_config = to_stdlib_loggers_config(config.loggers)
 
-    if (formatter := logging_config.handler.formatter) == Formatter.AUTO:
-        formatter = Formatter.PRETTY if stream.isatty() else Formatter.JSON
-
-    def to_logger_configs(loggers: _Loggers):  # type: ignore[no-untyped-def]
-        return {k: {"handlers": [handler], "level": v.level.upper()} for k, v in loggers.items()}
-
-    default_logger_configs = to_logger_configs({__name__: LoggerConfig(level=LevelName.CRITICAL)})
-    logger_configs = to_logger_configs(logging_config.loggers)
-
-    timestamper = structlog.processors.TimeStamper(fmt="iso", utc=True)
     shared_processors: list[Processor] = [
         structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
-        timestamper,
+        structlog.processors.TimeStamper(fmt="iso", utc=True),
     ]
 
     logging.config.dictConfig(
@@ -94,33 +95,33 @@ def configure_logging(path: Path) -> None:
                 },
             },
             "handlers": {
-                handler: {
+                HANDLER_NAME: {
                     "class": "logging.StreamHandler",
                     "formatter": formatter,
                     "level": LevelName.NOTSET.upper(),
-                    "stream": stream,
+                    "stream": STREAM,
                 },
             },
             "loggers": {
-                **default_logger_configs,
-                **logger_configs,
+                **default_stdlib_loggers_config,
+                **stdlib_loggers_config,
             },
         }
     )
 
-    structlog.configure_once(
+    structlog.configure(
         cache_logger_on_first_use=True,
         logger_factory=structlog.stdlib.LoggerFactory(),
-        processors=[*shared_processors, structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
+        processors=[
+            structlog.contextvars.merge_contextvars,
+            *shared_processors,
+            *(processors or []),
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+        ],
         wrapper_class=structlog.stdlib.BoundLogger,
     )
 
     sys.excepthook = handle_unhandled_exception
-
-
-def load_logging_config(path: Path) -> LoggingConfig:
-    config = path.read_bytes()
-    return LoggingConfig.model_validate_json(config)
 
 
 def handle_unhandled_exception(
@@ -130,5 +131,11 @@ def handle_unhandled_exception(
     /,
 ) -> None:
     if issubclass(type_, Exception):
-        logger.critical("unhandled_exception", exc_info=(type_, value, traceback))
+        LOGGER.critical("unhandled_exception", exc_info=(type_, value, traceback))
     sys.__excepthook__(type_, value, traceback)
+
+
+def to_stdlib_loggers_config(loggers_config: LoggersConfig, /) -> Mapping[str, Mapping[str, Any]]:
+    return {
+        k: {"handlers": [HANDLER_NAME], "level": v.level.upper()} for k, v in loggers_config.items()
+    }
