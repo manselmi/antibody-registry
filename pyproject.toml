@@ -34,7 +34,7 @@ lint = { features = ['lint'], solve-group = 'default' }
 [tool.pixi.feature.lint.pypi-dependencies]
 lxml-stubs = { version = '>=0.5.1' }
 mypy = { version = '>=1.19.1', extras = ['faster-cache'] }
-pre-commit = { version = '>=4.5.0' }
+pre-commit = { version = '>=4.5.1' }
 pre-commit-hooks = { version = '>=6.0.0' }
 ruff = { version = '>=0.14.9' }
 

@@ -2,7 +2,7 @@
 
 import logging.config
 import sys
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from enum import StrEnum, auto
 from types import TracebackType
 from typing import Any
@@ -50,12 +50,7 @@ class LoggingConfig(Model):
     loggers: LoggersConfig = Field(...)
 
 
-def configure_logging(
-    config: LoggingConfig,
-    /,
-    *,
-    processors: Sequence[Processor] | None = None,
-) -> None:
+def configure_logging(config: LoggingConfig, /) -> None:
     if (formatter := config.handler.formatter) == Formatter.AUTO:
         formatter = Formatter.PRETTY if STREAM.isatty() else Formatter.JSON
 
@@ -80,7 +75,9 @@ def configure_logging(
                     "()": structlog.stdlib.ProcessorFormatter,
                     "foreign_pre_chain": shared_processors,
                     "processors": [
-                        structlog.processors.dict_tracebacks,
+                        structlog.processors.ExceptionRenderer(
+                            structlog.tracebacks.ExceptionDictTransformer()
+                        ),
                         structlog.stdlib.ProcessorFormatter.remove_processors_meta,
                         structlog.processors.JSONRenderer(serializer=orjson.dumps),
                     ],
@@ -115,7 +112,6 @@ def configure_logging(
         processors=[
             structlog.contextvars.merge_contextvars,
             *shared_processors,
-            *(processors or []),
             structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
         ],
         wrapper_class=structlog.stdlib.BoundLogger,
