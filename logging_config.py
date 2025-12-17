@@ -55,7 +55,7 @@ def configure_logging(config: LoggingConfig, /) -> None:
         formatter = Formatter.PRETTY if STREAM.isatty() else Formatter.JSON
 
     default_stdlib_loggers_config = to_stdlib_loggers_config(
-        {__name__: LoggerConfig(level=LevelName.CRITICAL)}
+        {__name__: LoggerConfig(level=LevelName.NOTSET)}
     )
     stdlib_loggers_config = to_stdlib_loggers_config(config.loggers)
 
