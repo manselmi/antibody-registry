@@ -25,7 +25,7 @@ pydantic = { version = '>=2.12.5' }
 rich = { version = '>=14.2.0' }  # weak dependency of structlog
 stamina = { version = '>=25.2.0' }
 structlog = { version = '>=25.5.0' }
-typer = { version = '>=0.20.0' }
+typer = { version = '>=0.21.1' }
 
 [tool.pixi.environments]
 default = { solve-group = 'default' }
@@ -36,7 +36,7 @@ lxml-stubs = { version = '>=0.5.1' }
 mypy = { version = '>=1.19.1', extras = ['faster-cache'] }
 pre-commit = { version = '>=4.5.1' }
 pre-commit-hooks = { version = '>=6.0.0' }
-ruff = { version = '>=0.14.9' }
+ruff = { version = '>=0.14.11' }
 
 [tool.pixi.feature.lint.tasks]
 lint = { depends-on = ['pre-commit-run'] }
@@ -92,6 +92,7 @@ enable_incomplete_feature = [
   'TypeForm',
 ]
 fixed_format_cache = true
+install_types = false
 local_partial_types = true
 plugins = [
   'pydantic.mypy',
@@ -99,6 +100,7 @@ plugins = [
 python_version = '3.14'
 strict = true
 strict_bytes = true
+warn_unreachable = true
 
 
 [tool.pydantic-mypy]
@@ -112,8 +114,6 @@ line-length = 100
 target-version = 'py314'
 
 [tool.ruff.lint]
-explicit-preview-rules = true
-fixable = ['ALL']
 future-annotations = true
 ignore = [
   'ANN',      # mypy handles our type annotations
@@ -121,7 +121,7 @@ ignore = [
   'COM812',   # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
   'COM819',   # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
   'CPY',      # not publishing publicly
-  'D',        # we prefer our own docstring style
+  'D1',       # docstrings are optional
   'E111',     # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
   'E114',     # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
   'E117',     # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
@@ -134,12 +134,9 @@ ignore = [
   'Q001',     # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
   'Q002',     # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
   'Q003',     # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
-  'TCH',      # TYPE_CHECKING blocks break autodocs
   'W191',     # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
 ]
-preview = true
 select = ['ALL']
-unfixable = []
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
@@ -158,3 +155,6 @@ known-third-party = [
   'structlog',
   'typer',
 ]
+
+[tool.ruff.lint.pydocstyle]
+convention = 'pep257'

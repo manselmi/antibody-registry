@@ -4,15 +4,18 @@ import logging.config
 import sys
 from collections.abc import Mapping
 from enum import StrEnum, auto
-from types import TracebackType
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import orjson
 import structlog
 from pydantic.fields import Field
-from structlog.typing import Processor
 
 from pydantic_base_model import BaseModel as Model
+
+if TYPE_CHECKING:
+    from types import TracebackType
+
+    from structlog.typing import Processor
 
 HANDLER_NAME = "default"
 LOGGER = structlog.get_logger(__name__)

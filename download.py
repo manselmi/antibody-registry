@@ -6,31 +6,26 @@ import itertools
 import lzma
 import sys
 import time
-from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
 from threading import RLock
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import lxml.html
 import stamina
 import structlog
 import typer
-from httpx import (
-    URL,
-    Auth,
-    Client,
-    Cookies,
-    HTTPError,
-    HTTPStatusError,
-    Request,
-    Response,
-    Timeout,
-    codes,
-)
-from lxml.etree import _ElementUnicodeResult
+from httpx import URL, Auth, Client, HTTPError, HTTPStatusError, Timeout, codes
 
 from logging_config import LoggingConfig, configure_logging
-from secret import Secret, secret_cmd_argv, secret_env_var
+from secret import secret_cmd_argv, secret_env_var
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator, Generator
+
+    from httpx import Cookies, Request, Response
+    from lxml.etree import _ElementUnicodeResult
+
+    from secret import Secret
 
 LOGGER = structlog.get_logger(__name__)
 

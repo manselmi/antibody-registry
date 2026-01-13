@@ -10,13 +10,15 @@ https://docs.pydantic.dev/latest/usage/types/#secret-types
 import os
 import shlex
 import subprocess
-from collections.abc import Sequence
-from pathlib import Path
 from subprocess import PIPE
-from typing import TypedDict, Unpack
+from typing import TYPE_CHECKING, TypedDict, Unpack
 
 import structlog
 from pydantic.types import SecretStr
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+    from pathlib import Path
 
 LOGGER = structlog.get_logger(__name__)
 
@@ -36,7 +38,7 @@ class _ReadTextKwargs(TypedDict, total=False):
 
 def secret_cmd_argv(argv: Sequence[str], /) -> Secret:
     """
-    Read a secret from the given program's standard output.
+    Read a secret from the given command's standard output.
 
     Example:
         >>> with structlog.testing.capture_logs():
@@ -53,8 +55,7 @@ def secret_cmd_argv(argv: Sequence[str], /) -> Secret:
 
 def secret_cmd_env_var(name: str, /) -> Secret:
     """
-    Read a secret from the standard output of the program referenced by
-    the given environment variable.
+    Read a secret from the standard output of the command defined in the given environment variable.
 
     Example:
         >>> os.environ["SECRET_CMD"] = "/usr/bin/printf %s 'secret_value'"
