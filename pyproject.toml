@@ -36,7 +36,7 @@ lxml-stubs = { version = '>=0.5.1' }
 mypy = { version = '>=1.19.1', extras = ['faster-cache'] }
 pre-commit = { version = '>=4.5.1' }
 pre-commit-hooks = { version = '>=6.0.0' }
-ruff = { version = '>=0.14.11' }
+ruff = { version = '>=0.14.13' }
 
 [tool.pixi.feature.lint.tasks]
 lint = { depends-on = ['pre-commit-run'] }
@@ -112,6 +112,9 @@ warn_required_dynamic_aliases = true
 [tool.ruff]
 line-length = 100
 target-version = 'py314'
+
+[tool.ruff.format]
+preview = true
 
 [tool.ruff.lint]
 future-annotations = true

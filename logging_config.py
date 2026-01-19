@@ -57,9 +57,9 @@ def configure_logging(config: LoggingConfig, /) -> None:
     if (formatter := config.handler.formatter) == Formatter.AUTO:
         formatter = Formatter.PRETTY if STREAM.isatty() else Formatter.JSON
 
-    default_stdlib_loggers_config = to_stdlib_loggers_config(
-        {__name__: LoggerConfig(level=LevelName.NOTSET)}
-    )
+    default_stdlib_loggers_config = to_stdlib_loggers_config({
+        __name__: LoggerConfig(level=LevelName.NOTSET)
+    })
     stdlib_loggers_config = to_stdlib_loggers_config(config.loggers)
 
     shared_processors: list[Processor] = [
@@ -68,46 +68,44 @@ def configure_logging(config: LoggingConfig, /) -> None:
         structlog.processors.TimeStamper(fmt="iso", utc=True),
     ]
 
-    logging.config.dictConfig(
-        {
-            "version": 1,
-            "disable_existing_loggers": True,
-            "incremental": False,
-            "formatters": {
-                "json": {
-                    "()": structlog.stdlib.ProcessorFormatter,
-                    "foreign_pre_chain": shared_processors,
-                    "processors": [
-                        structlog.processors.ExceptionRenderer(
-                            structlog.tracebacks.ExceptionDictTransformer()
-                        ),
-                        structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-                        structlog.processors.JSONRenderer(serializer=orjson.dumps),
-                    ],
-                },
-                "pretty": {
-                    "()": structlog.stdlib.ProcessorFormatter,
-                    "foreign_pre_chain": shared_processors,
-                    "processors": [
-                        structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-                        structlog.dev.ConsoleRenderer(),
-                    ],
-                },
+    logging.config.dictConfig({
+        "version": 1,
+        "disable_existing_loggers": True,
+        "incremental": False,
+        "formatters": {
+            "json": {
+                "()": structlog.stdlib.ProcessorFormatter,
+                "foreign_pre_chain": shared_processors,
+                "processors": [
+                    structlog.processors.ExceptionRenderer(
+                        structlog.tracebacks.ExceptionDictTransformer()
+                    ),
+                    structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                    structlog.processors.JSONRenderer(serializer=orjson.dumps),
+                ],
             },
-            "handlers": {
-                HANDLER_NAME: {
-                    "class": "logging.StreamHandler",
-                    "formatter": formatter,
-                    "level": LevelName.NOTSET.upper(),
-                    "stream": STREAM,
-                },
+            "pretty": {
+                "()": structlog.stdlib.ProcessorFormatter,
+                "foreign_pre_chain": shared_processors,
+                "processors": [
+                    structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                    structlog.dev.ConsoleRenderer(),
+                ],
             },
-            "loggers": {
-                **default_stdlib_loggers_config,
-                **stdlib_loggers_config,
+        },
+        "handlers": {
+            HANDLER_NAME: {
+                "class": "logging.StreamHandler",
+                "formatter": formatter,
+                "level": LevelName.NOTSET.upper(),
+                "stream": STREAM,
             },
-        }
-    )
+        },
+        "loggers": {
+            **default_stdlib_loggers_config,
+            **stdlib_loggers_config,
+        },
+    })
 
     structlog.configure(
         cache_logger_on_first_use=True,

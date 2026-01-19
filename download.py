@@ -234,7 +234,7 @@ def main(
             try:
                 with lzma.open(path, mode="wb") as fobj:
                     fobj.write(response.content)
-            except (Exception, KeyboardInterrupt):
+            except Exception, KeyboardInterrupt:
                 log.exception("write_error")
                 path.unlink(missing_ok=True)
                 raise
