@@ -15,14 +15,14 @@ platforms = [
 ]
 
 [tool.pixi.dependencies]
-python = { version = '>=3.14.2,<3.15' }
+python = { version = '>=3.14.3,<3.15' }
 
 [tool.pixi.pypi-dependencies]
 httpx = { version = '>=0.28.1', extras = ['http2'] }
 lxml = { version = '>=6.0.2' }
-orjson = { version = '>=3.11.5' }
+orjson = { version = '>=3.11.7' }
 pydantic = { version = '>=2.12.5' }
-rich = { version = '>=14.2.0' }  # weak dependency of structlog
+rich = { version = '>=14.3.2' }  # weak dependency of structlog
 stamina = { version = '>=25.2.0' }
 structlog = { version = '>=25.5.0' }
 typer = { version = '>=0.21.1' }
@@ -36,7 +36,7 @@ lxml-stubs = { version = '>=0.5.1' }
 mypy = { version = '>=1.19.1', extras = ['faster-cache'] }
 pre-commit = { version = '>=4.5.1' }
 pre-commit-hooks = { version = '>=6.0.0' }
-ruff = { version = '>=0.14.13' }
+ruff = { version = '>=0.15.0' }
 
 [tool.pixi.feature.lint.tasks]
 lint = { depends-on = ['pre-commit-run'] }

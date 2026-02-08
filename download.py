@@ -115,9 +115,7 @@ def login_to_antibody_registry(client: Client, username: Secret, password: Secre
 
 
 def get_antibody_registry_credentials() -> tuple[Secret, Secret]:
-    if getpass.getuser() in {
-        "manselmi",
-    }:
+    if getpass.getuser() == "manselmi":
         username = secret_cmd_argv(
             [
                 "op",
