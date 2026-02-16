@@ -23,7 +23,7 @@ scheme](https://www.python-httpx.org/advanced/authentication/#custom-authenticat
 * Configure Git hooks:
 
     ``` shell
-    pixi run -- pre-commit-install
+    pixi run -- prek-install
     ```
 
 ## Example
