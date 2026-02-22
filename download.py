@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: set ft=python :
 
-import getpass
+
 import itertools
 import lzma
 import sys
@@ -17,7 +17,7 @@ import typer
 from httpx import URL, Auth, Client, HTTPError, HTTPStatusError, Timeout, codes
 
 from logging_config import LoggingConfig, configure_logging
-from secret import secret_cmd_argv, secret_env_var
+from secret import secret_env_var
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator, Generator
@@ -27,15 +27,16 @@ if TYPE_CHECKING:
 
     from secret import Secret
 
-LOGGER = structlog.get_logger(__name__)
-
-
 BASE_URL = URL("https://www.antibodyregistry.org/api/antibodies")
 HTTP2 = True
 DEFAULT_TIMEOUT = Timeout(5)  # seconds
 FETCH_TIMEOUT = Timeout(**{**DEFAULT_TIMEOUT.as_dict(), "read": 30})  # seconds
 FETCH_ATTEMPTS = 3
 PAGE_SIZE = 500
+
+
+app = typer.Typer(pretty_exceptions_show_locals=True)
+logger = structlog.get_logger(__name__)
 
 
 class AntibodyRegistryAuth(Auth):
@@ -94,7 +95,7 @@ def login_to_antibody_registry(client: Client, username: Secret, password: Secre
     xpath: list[_ElementUnicodeResult] = tree.xpath('//form[@id="kc-form-login"]/@action')  # type: ignore[assignment]
     if not xpath:
         msg = "login_post_url_not_found"
-        LOGGER.error(msg)
+        logger.error(msg)
         raise XMLError(msg)
     login_post_url = URL(str(xpath[0]))
 
@@ -115,28 +116,10 @@ def login_to_antibody_registry(client: Client, username: Secret, password: Secre
 
 
 def get_antibody_registry_credentials() -> tuple[Secret, Secret]:
-    if getpass.getuser() == "manselmi":
-        username = secret_cmd_argv(
-            [
-                "op",
-                "read",
-                "--no-newline",
-                "op://yksesvynnyj573ps3dagfglceu/de3yx4c5zeor7ztpbleisrkcvi/username",
-            ],
-        )
-        password = secret_cmd_argv(
-            [
-                "op",
-                "read",
-                "--no-newline",
-                "op://yksesvynnyj573ps3dagfglceu/de3yx4c5zeor7ztpbleisrkcvi/password",
-            ],
-        )
-    else:
-        username = secret_env_var("ANTIBODY_REGISTRY_USERNAME")
-        password = secret_env_var("ANTIBODY_REGISTRY_PASSWORD")
-
-    return username, password
+    return (
+        secret_env_var("ANTIBODY_REGISTRY_USERNAME"),
+        secret_env_var("ANTIBODY_REGISTRY_PASSWORD"),
+    )
 
 
 def retry(exc: Exception) -> bool:
@@ -146,6 +129,7 @@ def retry(exc: Exception) -> bool:
     return isinstance(exc, HTTPError)
 
 
+@app.command()
 def main(
     logging_config: Annotated[
         Path, typer.Option(help="file from which the logging configuration will be read")
@@ -156,7 +140,7 @@ def main(
 ) -> None:
     configure_logging(LoggingConfig.model_validate_json(logging_config.read_bytes()))
 
-    log = LOGGER.bind(base_url=str(BASE_URL))
+    log = logger.bind(base_url=str(BASE_URL))
 
     params = {"size": PAGE_SIZE}
     username, password = get_antibody_registry_credentials()
@@ -246,4 +230,4 @@ def main(
 
 
 if __name__ == "__main__":
-    typer.run(main)
+    app()

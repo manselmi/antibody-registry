@@ -11,27 +11,23 @@ scheme](https://www.python-httpx.org/advanced/authentication/#custom-authenticat
 
 ## Prerequisites
 
-### Required
-
-* [Pixi](https://pixi.sh)
+* [mise](https://mise.jdx.dev/)
 
 * Antibody Registry username and password in the environment variables `ANTIBODY_REGISTRY_USERNAME`
-  and `ANTIBODY_REGISTRY_PASSWORD`, respectively.
+  and `ANTIBODY_REGISTRY_PASSWORD`, respectively. Override `fnox.toml` with `fnox.local.toml`.
 
-### Optional
+    * [fnox](https://fnox.jdx.dev/)
 
-* Configure Git hooks:
-
-    ``` shell
-    pixi run -- prek-install
-    ```
+``` shell
+mise run install
+```
 
 ## Example
 
 ### Invocation
 
 ``` shell
-pixi run -- ./download.py
+mise run
 ```
 
 ### Output

@@ -10,40 +10,30 @@ channels = ['conda-forge']
 platforms = [
   'linux-64',
   'linux-aarch64',
-  'osx-64',
   'osx-arm64',
 ]
 
 [tool.pixi.dependencies]
-python = { version = '>=3.14.3,<3.15' }
+python = { version = '>=3.14,<3.15' }
 
 [tool.pixi.pypi-dependencies]
-httpx = { version = '>=0.28.1', extras = ['http2'] }
-lxml = { version = '>=6.0.2' }
-orjson = { version = '>=3.11.7' }
-pydantic = { version = '>=2.12.5' }
-rich = { version = '>=14.3.2' }  # weak dependency of structlog
-stamina = { version = '>=25.2.0' }
-structlog = { version = '>=25.5.0' }
-typer = { version = '>=0.23.1' }
+httpx = { version = '*', extras = ['http2'] }
+lxml = { version = '*' }
+orjson = { version = '*' }
+pydantic = { version = '*' }
+rich = { version = '*' }  # weak dependency of structlog
+stamina = { version = '*' }
+structlog = { version = '*' }
+typer = { version = '*' }
 
 [tool.pixi.environments]
 default = { solve-group = 'default' }
 lint = { features = ['lint'], solve-group = 'default' }
 
-[tool.pixi.feature.lint.dependencies]
-prek = { version = '>=0.3.2' }
-ruff = { version = '>=0.15.1' }
-
 [tool.pixi.feature.lint.pypi-dependencies]
-lxml-stubs = { version = '>=0.5.1' }
-mypy = { version = '>=1.19.1', extras = ['faster-cache'] }
-
-[tool.pixi.feature.lint.tasks]
-lint = { depends-on = ['prek-run'] }
-# https://github.com/prefix-dev/pixi/discussions/1897
-prek-install = { cmd = ['prek', 'install', '-f'] }
-prek-run = { cmd = ['prek', 'run', '--all-files'] }
+lxml-stubs = { version = '*' }
+mypy = { version = '*', extras = ['faster-cache'] }
+ruff = { version = '*' }
 
 
 [tool.mypy]

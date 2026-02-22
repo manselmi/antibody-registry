@@ -1,0 +1,13 @@
+# vim: set ft=toml :
+
+
+if_missing = 'error'
+
+
+[providers]
+op = { type = '1password', vault = 'yksesvynnyj573ps3dagfglceu' }
+
+
+[secrets]
+ANTIBODY_REGISTRY_USERNAME = { provider = 'op', value = 'de3yx4c5zeor7ztpbleisrkcvi/username' }
+ANTIBODY_REGISTRY_PASSWORD = { provider = 'op', value = 'de3yx4c5zeor7ztpbleisrkcvi/password' }

@@ -1,5 +1,6 @@
 # vim: set ft=python :
 
+
 from pydantic.config import ConfigDict
 from pydantic.main import BaseModel as PydanticBaseModel
 

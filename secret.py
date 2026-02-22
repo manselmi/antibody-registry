@@ -1,5 +1,6 @@
 # vim: set ft=python :
 
+
 """
 Read secrets from various sources.
 
