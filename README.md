@@ -33,17 +33,17 @@ mise run
 ### Output
 
 ``` text
-2025-08-02T22:27:12.013186Z [info     ] fetch_begin                    [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 1}
-2025-08-02T22:27:12.653698Z [info     ] fetch_end                      [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') current_element=500 params={'size': 500, 'page': 1} status_code=200 total_elements=3165751
-2025-08-02T22:27:12.653840Z [info     ] write_begin                    [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 1} path=PosixPath('output/1.xz')
-2025-08-02T22:27:12.713354Z [info     ] write_end                      [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 1} path=PosixPath('output/1.xz')
-2025-08-02T22:27:12.713554Z [info     ] fetch_begin                    [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 2}
-2025-08-02T22:27:14.404534Z [info     ] fetch_end                      [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') current_element=1000 params={'size': 500, 'page': 2} status_code=200 total_elements=3165751
-2025-08-02T22:27:14.404679Z [info     ] write_begin                    [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 2} path=PosixPath('output/2.xz')
-2025-08-02T22:27:14.467674Z [info     ] write_end                      [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 2} path=PosixPath('output/2.xz')
-2025-08-02T22:27:14.467956Z [info     ] fetch_begin                    [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 3}
-2025-08-02T22:27:16.617738Z [info     ] fetch_end                      [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') current_element=1500 params={'size': 500, 'page': 3} status_code=200 total_elements=3165751
-2025-08-02T22:27:16.617861Z [info     ] write_begin                    [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 3} path=PosixPath('output/3.xz')
-2025-08-02T22:27:16.676705Z [info     ] write_end                      [__main__] base_url=URL('https://www.antibodyregistry.org/api/antibodies') params={'size': 500, 'page': 3} path=PosixPath('output/3.xz')
+2026-02-24T17:46:46.097454Z [info     ] fetch_begin                    [__main__] base_url=https://www.antibodyregistry.org/api/antibodies params={'size': 500, 'page': 1}
+2026-02-24T17:46:49.905613Z [info     ] fetch_end                      [__main__] base_url=https://www.antibodyregistry.org/api/antibodies current_element=500 params={'size': 500, 'page': 1} status_code=200 total_elements=3174639
+2026-02-24T17:46:49.906002Z [info     ] write_begin                    [__main__] base_url=https://www.antibodyregistry.org/api/antibodies params={'size': 500, 'page': 1} path=output/1.xz
+2026-02-24T17:46:49.963930Z [info     ] write_end                      [__main__] base_url=https://www.antibodyregistry.org/api/antibodies params={'size': 500, 'page': 1} path=output/1.xz
+2026-02-24T17:46:49.964125Z [info     ] fetch_begin                    [__main__] base_url=https://www.antibodyregistry.org/api/antibodies params={'size': 500, 'page': 2}
+2026-02-24T17:46:53.789570Z [info     ] fetch_end                      [__main__] base_url=https://www.antibodyregistry.org/api/antibodies current_element=1000 params={'size': 500, 'page': 2} status_code=200 total_elements=3174639
+2026-02-24T17:46:53.789914Z [info     ] write_begin                    [__main__] base_url=https://www.antibodyregistry.org/api/antibodies params={'size': 500, 'page': 2} path=output/2.xz
+2026-02-24T17:46:53.836948Z [info     ] write_end                      [__main__] base_url=https://www.antibodyregistry.org/api/antibodies params={'size': 500, 'page': 2} path=output/2.xz
+2026-02-24T17:46:53.837131Z [info     ] fetch_begin                    [__main__] base_url=https://www.antibodyregistry.org/api/antibodies params={'size': 500, 'page': 3}
+2026-02-24T17:47:00.813162Z [info     ] fetch_end                      [__main__] base_url=https://www.antibodyregistry.org/api/antibodies current_element=1500 params={'size': 500, 'page': 3} status_code=200 total_elements=3174639
+2026-02-24T17:47:00.813471Z [info     ] write_begin                    [__main__] base_url=https://www.antibodyregistry.org/api/antibodies params={'size': 500, 'page': 3} path=output/3.xz
+2026-02-24T17:47:00.875993Z [info     ] write_end                      [__main__] base_url=https://www.antibodyregistry.org/api/antibodies params={'size': 500, 'page': 3} path=output/3.xz
 …
 ```

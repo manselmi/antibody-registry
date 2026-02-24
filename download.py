@@ -211,7 +211,7 @@ def main(
                     "total_elements",
                 )
 
-            log = log.bind(path=path)
+            log = log.bind(path=str(path))
             log.info("write_begin")
             try:
                 with lzma.open(path, mode="wb") as fobj:
