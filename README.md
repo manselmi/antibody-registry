@@ -18,10 +18,6 @@ scheme](https://www.python-httpx.org/advanced/authentication/#custom-authenticat
 
     * [fnox](https://fnox.jdx.dev/)
 
-``` shell
-mise run install
-```
-
 ## Example
 
 ### Invocation
