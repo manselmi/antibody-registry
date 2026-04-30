@@ -11,7 +11,7 @@ scheme](https://www.python-httpx.org/advanced/authentication/#custom-authenticat
 
 ## Prerequisites
 
-* [mise](https://mise.jdx.dev/)
+* [mise](https://mise.en.dev/)
 
 * Antibody Registry username and password in the environment variables `ANTIBODY_REGISTRY_USERNAME`
   and `ANTIBODY_REGISTRY_PASSWORD`, respectively. Override `fnox.toml` with `fnox.local.toml`.
