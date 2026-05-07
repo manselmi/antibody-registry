@@ -37,20 +37,18 @@ ruff = { version = '*' }
 
 
 [tool.mypy]
-allow_redefinition_new = true
+allow_redefinition = true
 enable_incomplete_feature = [
   'PreciseTupleTypes',
   'TypeForm',
 ]
 fixed_format_cache = true
 install_types = false
-local_partial_types = true
 plugins = [
   'pydantic.mypy',
 ]
 python_version = '3.14'
 strict = true
-strict_bytes = true
 warn_unreachable = true
 
 
