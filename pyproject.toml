@@ -32,7 +32,7 @@ lint = { features = ['lint'], solve-group = 'default' }
 
 [tool.pixi.feature.lint.pypi-dependencies]
 lxml-stubs = { version = '*' }
-mypy = { version = '*', extras = ['faster-cache'] }
+mypy = { version = '*' }
 ruff = { version = '*' }
 
 
@@ -42,7 +42,6 @@ enable_incomplete_feature = [
   'PreciseTupleTypes',
   'TypeForm',
 ]
-fixed_format_cache = true
 install_types = false
 plugins = [
   'pydantic.mypy',
