@@ -6,7 +6,7 @@
     "__main__": {
       "level": "info"
     },
-    "httpx": {
+    "httpx2": {
       "level": "warning"
     },
     "secret": {

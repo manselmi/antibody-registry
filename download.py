@@ -14,7 +14,7 @@ import lxml.html
 import stamina
 import structlog
 import typer
-from httpx import URL, Auth, Client, HTTPError, HTTPStatusError, Timeout, codes
+from httpx2 import URL, Auth, Client, HTTPError, HTTPStatusError, Timeout, codes
 
 from logging_config import LoggingConfig, configure_logging
 from secret import secret_env_var
@@ -22,7 +22,7 @@ from secret import secret_env_var
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator, Generator
 
-    from httpx import Cookies, Request, Response
+    from httpx2 import Cookies, Request, Response
     from lxml.etree import _ElementUnicodeResult
 
     from secret import Secret

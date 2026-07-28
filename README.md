@@ -6,8 +6,8 @@
 ## Summary
 
 The script `download.py` demonstrates automated headless login to the Antibody Registry
-with [`httpx`](https://www.python-httpx.org/) by implementing a [custom authentication
-scheme](https://www.python-httpx.org/advanced/authentication/#custom-authentication-schemes).
+with [`httpx2`](https://httpx2.pydantic.dev/) by implementing a [custom authentication
+scheme](https://httpx2.pydantic.dev/advanced/authentication/#custom-authentication-schemes).
 
 ## Prerequisites
 

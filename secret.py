@@ -49,9 +49,7 @@ def secret_cmd_argv(argv: Sequence[str], /) -> Secret:
     """
     log = LOGGER.bind(secret_cmd_argv=argv)
     log.debug("run_secret_cmd")
-    return Secret(
-        subprocess.run(argv, check=True, encoding="utf-8", stdout=PIPE).stdout  # noqa:S603
-    )
+    return Secret(subprocess.run(argv, check=True, encoding="utf-8", stdout=PIPE).stdout)
 
 
 def secret_cmd_env_var(name: str, /) -> Secret:
